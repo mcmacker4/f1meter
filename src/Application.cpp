@@ -1,23 +1,45 @@
 #include "Application.h"
 
 #include "render/RenderingContext.h"
+#include "render/PhysicalWindow.h"
 
-#include <imgui/imgui.h>
+namespace Application {
 
-void Application::Start() {
+    static Gui::Context* guiContext = nullptr;
 
-    RenderingContext::Initialize();
+    void Start() {
 
-    while(IsRunning()) {
-        RenderingContext::PollEvents();
+        RenderingContext::Initialize();
 
-        RenderingContext::NextFrame();
+        guiContext = new Gui::Context;
+
+        while (IsRunning()) {
+            RenderingContext::StartFrame();
+
+            guiContext->BeginFrame();
+            guiContext->Draw();
+            guiContext->EndFrame();
+
+            RenderingContext::FinishFrame();
+        }
+
+        RenderingContext::Terminate();
+
     }
 
-    RenderingContext::Terminate();
+    void Stop() {
+        PhysicalWindow::Close();
+    }
 
-}
+    bool IsRunning() {
+        return RenderingContext::IsRunning();
+    }
 
-bool Application::IsRunning() {
-    return RenderingContext::IsRunning();
+    Gui::Context* GetGuiContext() {
+        if (guiContext == nullptr) {
+            throw std::exception("Trying to fetch Gui::Context before it is created.");
+        }
+        return guiContext;
+    }
+
 }

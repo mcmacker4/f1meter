@@ -1,17 +1,18 @@
 #ifndef F1METER_APPLICATION_H
 #define F1METER_APPLICATION_H
 
+#include "gui/Context.h"
 
-class Application {
+namespace Application {
 
-public:
-    Application() = delete;
+    void Start();
 
-    static void Start();
+    void Stop();
 
-    static bool IsRunning();
+    bool IsRunning();
+    Gui::Context* GetGuiContext();
 
-};
+}
 
 
 #endif //F1METER_APPLICATION_H

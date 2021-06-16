@@ -3,24 +3,19 @@
 
 #include <GLFW/glfw3.h>
 
-class PhysicalWindow {
+namespace PhysicalWindow {
 
-    static GLFWwindow* handle;
+    void Create(int width, int height, const char* title);
+    void Destroy();
 
-public:
-    PhysicalWindow() = delete;
+    void SwapBuffers();
 
-    static void Create(int width, int height, const char* title);
-    static void Destroy();
+    void Close();
 
-    static void SwapBuffers();
+    bool ShouldClose();
+    GLFWwindow* GetHandle();
 
-    static void Close();
-
-    static bool ShouldClose();
-    static GLFWwindow* GetHandle();
-
-};
+}
 
 
 #endif //F1METER_PHYSICALWINDOW_H

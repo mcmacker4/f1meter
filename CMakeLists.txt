@@ -19,6 +19,8 @@ add_executable(f1meter
         src/main.cpp
         src/Application.cpp
         src/render/PhysicalWindow.cpp
-        src/render/RenderingContext.cpp)
+        src/render/RenderingContext.cpp
+        src/gui/Context.cpp
+        src/gui/Dockspace.cpp)
 
 target_link_libraries(f1meter glfw glad imgui)

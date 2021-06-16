@@ -14,6 +14,13 @@
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
 
+void InitializeGLFW();
+void InitializeGLAD();
+void InitializeImGui();
+
+void TerminateImGui();
+void TerminateGLFW();
+
 
 void RenderingContext::Initialize() {
     InitializeGLFW();
@@ -28,22 +35,26 @@ void RenderingContext::Terminate() {
     TerminateGLFW();
 }
 
-void RenderingContext::PollEvents() {
+void RenderingContext::StartFrame() {
     glfwPollEvents();
 }
 
-void RenderingContext::NextFrame() {
+void RenderingContext::FinishFrame() {
     PhysicalWindow::SwapBuffers();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void glfw_error_callback(int code, const char* desc) {
+bool RenderingContext::IsRunning() {
+    return !PhysicalWindow::ShouldClose();
+}
+
+void GlfwErrorCallback(int code, const char* desc) {
     std::cerr << "[GLFW ERROR] " << desc << std::endl;
 }
 
-void RenderingContext::InitializeGLFW() {
+void InitializeGLFW() {
 
-    glfwSetErrorCallback(glfw_error_callback);
+    glfwSetErrorCallback(GlfwErrorCallback);
 
     if (glfwInit() != GLFW_TRUE) {
         throw RenderingContextException("Could not initialize GLFW");
@@ -55,35 +66,34 @@ void RenderingContext::InitializeGLFW() {
 
 }
 
-void RenderingContext::InitializeGLAD() {
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+void InitializeGLAD() {
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         throw RenderingContextException("Could not initialize GLAD.");
     }
 }
 
-void RenderingContext::InitializeImGui() {
+void InitializeImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
     ImGui_ImplGlfw_InitForOpenGL(PhysicalWindow::GetHandle(), true);
     ImGui_ImplOpenGL3_Init("#version 150");
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = nullptr;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
-void RenderingContext::TerminateImGui() {
+void TerminateImGui() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void RenderingContext::TerminateGLFW() {
+void TerminateGLFW() {
     PhysicalWindow::Destroy();
     glfwTerminate();
 }
-
-bool RenderingContext::IsRunning() {
-    return !PhysicalWindow::ShouldClose();
-}
-
 
 RenderingContextException::RenderingContextException(std::string msg)
     : msg(std::move(msg)) {}

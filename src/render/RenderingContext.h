@@ -4,28 +4,17 @@
 #include <exception>
 #include <string>
 
-class RenderingContext {
+namespace RenderingContext {
 
-public:
-    RenderingContext() = delete;
+    void Initialize();
+    void Terminate();
 
-    static void Initialize();
-    static void Terminate();
+    void StartFrame();
+    void FinishFrame();
 
-    static void PollEvents();
-    static void NextFrame();
+    bool IsRunning();
 
-    static bool IsRunning();
-
-private:
-    static void InitializeGLFW();
-    static void InitializeGLAD();
-    static void InitializeImGui();
-
-    static void TerminateImGui();
-    static void TerminateGLFW();
-
-};
+}
 
 class RenderingContextException : public std::exception {
     std::string msg;
