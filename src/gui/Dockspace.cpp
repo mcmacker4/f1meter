@@ -34,14 +34,22 @@ namespace Gui {
         ImGui::PopStyleVar();
 
         if (ImGui::BeginMenuBar()) {
+
             if (ImGui::BeginMenu("File")) {
-                ImGui::MenuItem("Show Demo", nullptr, &Application::GetGuiContext()->showDemo);
-                ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) {
                     Application::Stop();
                 }
                 ImGui::EndMenu();
             }
+
+#ifdef F1_DEBUG
+            if (ImGui::BeginMenu("Debug")) {
+                ImGui::MenuItem("ImGui Demo", nullptr, &Application::GetGuiContext()->showImGuiDemo);
+                ImGui::MenuItem("ImPlot Demo", nullptr, &Application::GetGuiContext()->showImPlotDemo);
+                ImGui::EndMenu();
+            }
+#endif
+
             ImGui::EndMenuBar();
         }
 

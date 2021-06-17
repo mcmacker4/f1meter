@@ -8,6 +8,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <implot/implot.h>
 
 #include "PhysicalWindow.h"
 
@@ -17,7 +18,9 @@
 void InitializeGLFW();
 void InitializeGLAD();
 void InitializeImGui();
+void InitializeImPlot();
 
+void TerminateImPlot();
 void TerminateImGui();
 void TerminateGLFW();
 
@@ -27,9 +30,11 @@ void RenderingContext::Initialize() {
     InitializeGLAD();
 
     InitializeImGui();
+    InitializeImPlot();
 }
 
 void RenderingContext::Terminate() {
+    TerminateImPlot();
     TerminateImGui();
 
     TerminateGLFW();
@@ -82,6 +87,14 @@ void InitializeImGui() {
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+}
+
+void InitializeImPlot() {
+    ImPlot::CreateContext();
+}
+
+void TerminateImPlot() {
+    ImPlot::DestroyContext();
 }
 
 void TerminateImGui() {
