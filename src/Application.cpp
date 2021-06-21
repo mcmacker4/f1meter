@@ -1,45 +1,80 @@
 #include "Application.h"
 
-#include "render/RenderingContext.h"
-#include "render/PhysicalWindow.h"
+#include "gui/internal/RenderContext.h"
+#include "telemetry/Telemetry.h"
 
-namespace Application {
+#include <imgui/imgui.h>
+#include <implot/implot.h>
 
-    static Gui::Context* guiContext = nullptr;
+#include <iostream>
 
-    void Start() {
+Application* Application::instance = nullptr;
 
-        RenderingContext::Initialize();
+void Application::Start() {
+    Initialize();
+    Run();
+    CleanUp();
+}
 
-        guiContext = new Gui::Context;
+void Application::Initialize() {
+    RenderContext::GetInstance().Initialize();
+}
 
-        while (IsRunning()) {
-            RenderingContext::StartFrame();
+void Application::Run() {
 
-            guiContext->BeginFrame();
-            guiContext->Draw();
-            guiContext->EndFrame();
+    auto& renderContext = RenderContext::GetInstance();
+    auto& telemetry = Telemetry::GetInstance();
 
-            RenderingContext::FinishFrame();
+    telemetry.StartUdpServer();
+
+    while (renderContext.IsRunning()) {
+        renderContext.StartFrame();
+
+        auto& carTelemetry = telemetry.GetCarTelemetryData();
+        auto count = carTelemetry.Count();
+
+        ImPlot::ShowDemoWindow();
+
+        if (ImGui::Begin("Telemetry")) {
+
+            ImPlot::SetNextPlotLimits(0, 1000, 0, 400);
+
+            if (ImPlot::BeginPlot("Speed")) {
+
+                ImPlotPoint (*speedGetter)(void*, int) = [](void* data, int idx) {
+                    CarTelemetryDataPoint& point = (*reinterpret_cast<CarTelemetryData*>(data))[idx];
+                    return ImPlotPoint(point.time, point.speed);
+                };
+                ImPlotPoint (*rpmGetter)(void*, int) = [](void* data, int idx) {
+                    CarTelemetryDataPoint& point = (*reinterpret_cast<CarTelemetryData*>(data))[idx];
+                    return ImPlotPoint(point.time, point.engineRPM / 10);
+                };
+
+                ImPlot::PlotLineG("speed", speedGetter, &carTelemetry, count);
+                ImPlot::PlotLineG("rpm", rpmGetter, &carTelemetry, count);
+                ImPlot::EndPlot();
+            }
         }
 
-        RenderingContext::Terminate();
+        ImGui::End();
 
+        renderContext.EndFrame();
     }
 
-    void Stop() {
-        PhysicalWindow::Close();
-    }
+}
 
-    bool IsRunning() {
-        return RenderingContext::IsRunning();
-    }
+void Application::CleanUp() {
+    RenderContext::GetInstance().CleanUp();
+    RenderContext::DeleteInstance();
+}
 
-    Gui::Context* GetGuiContext() {
-        if (guiContext == nullptr) {
-            throw std::exception("Trying to fetch Gui::Context before it is created.");
-        }
-        return guiContext;
+Application& Application::GetInstance() {
+    if (instance == nullptr) {
+        instance = new Application;
     }
+    return *instance;
+}
 
+void Application::DeleteInstance() {
+    delete instance;
 }

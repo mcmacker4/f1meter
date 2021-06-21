@@ -1,5 +1,8 @@
 #include "Application.h"
 
+
 int main() {
-    Application::Start();
+    Application::GetInstance().Start();
+    Application::DeleteInstance();
+    return 0;
 }

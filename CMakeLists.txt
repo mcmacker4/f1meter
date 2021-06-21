@@ -23,13 +23,16 @@ add_subdirectory(lib/implot)
 add_executable(f1meter
         src/main.cpp
         src/Application.cpp
-        src/render/PhysicalWindow.cpp
-        src/render/RenderingContext.cpp
-        src/gui/Context.cpp
-        src/gui/Dockspace.cpp
-        src/gui/PlotWindow.cpp)
+        src/gui/internal/RenderContext.cpp
+        src/gui/internal/PhysicalWindow.cpp
+        src/telemetry/Telemetry.cpp
+        src/telemetry/udp/PacketProcessing.cpp
+        src/telemetry/udp/UdpServer.cpp
+        src/telemetry/udp/UdpSocket.cpp
+        src/telemetry/udp/platform/UdpSocketWindows.cpp
+)
 
-target_link_libraries(f1meter glfw glad imgui implot)
+target_link_libraries(f1meter glfw glad imgui implot wsock32 ws2_32)
 
 if (F1_DEBUG)
     target_compile_definitions(f1meter PUBLIC F1_DEBUG)
